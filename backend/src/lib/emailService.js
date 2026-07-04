@@ -11,15 +11,14 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, 
+  host: process.env.EMAIL_HOST,
+  port: parseInt(process.env.EMAIL_PORT),
+  secure: process.env.EMAIL_SECURE === 'true',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
-
 
 transporter.verify((error) => {
   if (error) {
