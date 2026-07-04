@@ -17,10 +17,10 @@
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/chahat885/B-D-App.git"
-  },
+ "repository": {
+  "type": "git",
+  "url": "git+https://github.com/tarun11845/Campus-book.git"
+ },
   "keywords": [
     "swimming",
     "pool",
@@ -29,12 +29,12 @@
     "react",
     "nodejs"
   ],
-  "author": "",
+  "author": "Tarun Dhote",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/chahat885/B-D-App/issues"
-  },
-  "homepage": "https://github.com/chahat885/B-D-App#readme",
+  "url": "https://github.com/tarun11845/Campus-book/issues"
+   },
+  "homepage": "https://github.com/tarun11845/Campus-book#readme",
   "dependencies": {
     "react-toastify": "^11.0.5"
   }

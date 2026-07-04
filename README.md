@@ -25,7 +25,7 @@ A modern web application for booking swimming pool slots at NITK with gender sep
 1. **Clone the repository**
    ```bash
    git clone <your-repo-url>
-   cd B-D-App
+  cd Campus-book
    ```
 
 2. **Run the setup script**

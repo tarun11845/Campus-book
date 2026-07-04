@@ -27,7 +27,7 @@ async function createAdmin() {
     // Connect to MongoDB
     console.log('🔌 Connecting to MongoDB...');
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/nitk-pool-booking');
-    console.log('✅ Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
     // Check if admin already exists
     const existingAdmin = await User.findOne({ role: 'admin' });
@@ -40,21 +40,21 @@ async function createAdmin() {
     // Create admin user
 
     const adminData = {
-      name: 'Saikat Dey',
-      email: 'saikatdey.234ca052@nitk.edu.in',
+      name: 'Tarun Dhote',
+      email: 'tarun.244ca057@nitk.edu.in',
       password: await bcrypt.hash('admin123', 10),
       role: 'admin',
       gender: 'male'
     };
 
     const admin = await User.create(adminData);
-    console.log('✅ Admin user created successfully!');
-    console.log('📧 Email:', admin.email);
-    console.log('🔑 Password: admin123');
-    console.log('⚠️  Please change the password after first login!');
+    console.log(' Admin user created successfully!');
+    console.log(' Email:', admin.email);
+    console.log( 'Password: admin123');
+    console.log(' Please change the password after first login!');
 
   } catch (error) {
-    console.error('❌ Error creating admin user:', error.message);
+    console.error('Error creating admin user:', error.message);
     process.exit(1);
   } finally {
     await mongoose.disconnect();

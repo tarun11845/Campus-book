@@ -9,7 +9,7 @@
     "dev": "nodemon src/index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Tarun Dhote",
   "license": "ISC",
   "description": "",
   "type": "module",
