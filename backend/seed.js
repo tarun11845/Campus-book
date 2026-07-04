@@ -75,21 +75,21 @@ async function seedDatabase() {
       {
         sport: createdSports.find(s => s.name === 'Tennis')._id,
         name: 'Tennis Court',
-        maxPlayers: 1,
+        maxPlayers: 4,
         allowedGender: 'both',
         isActive: true
       },
       {
         sport: createdSports.find(s => s.name === 'Basketball')._id,
         name: 'Basketball Court',
-        maxPlayers: 1,
+        maxPlayers: 4,
         allowedGender: 'both',
         isActive: true
       },
       {
         sport: createdSports.find(s => s.name === 'Badminton')._id,
         name: 'Badminton Court',
-        maxPlayers: 1,
+        maxPlayers: 4,
         allowedGender: 'both',
         isActive: true
       }
