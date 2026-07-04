@@ -23,7 +23,7 @@ const SlotManagement = ({ sportKey }) => {
   const API_BASE =
     import.meta.env.MODE === "development"
       ? "http://localhost:4000"
-      : "";
+      : 'https://campus-book-sx4m.onrender.com';
 
   const showMessage = (type, text) => {
     setMessage({ type, text });

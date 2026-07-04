@@ -19,7 +19,7 @@ const CalendarPage = () => {
 
   const API_BASE = import.meta.env.MODE === 'development' 
   ? 'http://localhost:4000' 
-  : ''; // production
+  : 'https://campus-book-sx4m.onrender.com'; // production
  
 
 
