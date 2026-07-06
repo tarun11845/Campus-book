@@ -9,6 +9,7 @@ const router = express.Router();
 // Send OTP for email verification
 router.post(
   '/send-otp',
+
   [body('email').isEmail().custom(email => {
     if (!email.endsWith('@nitk.edu.in')) {
       throw new Error('Only NITK college emails are allowed');
@@ -160,6 +161,7 @@ router.post(
     const { name, email, password, role, gender } = req.body;
     // Debug minimal log to verify payload contains gender
     try { console.log('Register payload (sanitized):', { email, role, gender }); } catch {}
+    
     const normalizedGender = typeof gender === 'string' ? gender.toLowerCase().trim() : '';
     if (!normalizedGender || !['male','female'].includes(normalizedGender)) {
       return res.status(400).json({ error: 'Gender is required and must be male or female' });
