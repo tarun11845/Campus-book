@@ -111,6 +111,7 @@ const CalendarPage = () => {
 
   const formatDate = useCallback((date) => {
     return date.toLocaleDateString('en-IN', {
+      timeZone: 'Asia/Kolkata',
       weekday: 'short',
       month: 'short',
       day: 'numeric'
