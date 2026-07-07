@@ -50,9 +50,11 @@ const BookingsTable = ({ bookings, loading, onCancelBooking }) => {
               </td>
               <td className="py-3 px-4">
                 <div>
-                  <div className="font-medium text-gray-800">
+                 <div className="font-medium text-gray-800">
                     {booking.slot?.startTime
-                      ? new Date(booking.slot.startTime).toLocaleDateString()
+                      ? new Date(booking.slot.startTime).toLocaleDateString('en-IN', {
+                          timeZone: 'Asia/Kolkata'
+                        })
                       : "—"}
                   </div>
                   <div className="text-sm text-gray-500">
