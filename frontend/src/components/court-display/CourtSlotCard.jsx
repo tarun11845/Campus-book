@@ -8,7 +8,8 @@ const CourtSlotCard = ({ slot, onSlotClick }) => {
     if (!dateString) return "—";
     const date = new Date(dateString);
     if (isNaN(date)) return "—";
-    return date.toLocaleTimeString("en-US", {
+    return date.toLocaleTimeString("en-IN", {
+      timeZone: 'Asia/Kolkata',
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,

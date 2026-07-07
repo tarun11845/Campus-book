@@ -62,7 +62,8 @@ const SwimmingBookingModal = ({ slot, onClose, onSuccess }) => {
     if (!date) return "—";
     const d = new Date(date);
     if (isNaN(d)) return "—";
-    return d.toLocaleTimeString("en-US", {
+    return d.toLocaleTimeString("en-IN", {
+      timeZone: 'Asia/Kolkata',
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,

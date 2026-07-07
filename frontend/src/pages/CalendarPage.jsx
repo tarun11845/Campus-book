@@ -101,7 +101,8 @@ const CalendarPage = () => {
   };
 
   const formatTime = useCallback((dateString) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
+    return new Date(dateString).toLocaleTimeString('en-IN', {
+      timeZone: 'Asia/Kolkata',
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
@@ -109,7 +110,7 @@ const CalendarPage = () => {
   }, []);
 
   const formatDate = useCallback((date) => {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('en-IN', {
       weekday: 'short',
       month: 'short',
       day: 'numeric'
@@ -195,7 +196,7 @@ const CalendarPage = () => {
               >
                 <div className="text-center">
                   <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
-                    {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                    {date.toLocaleDateString('en-IN', { weekday: 'short' })}
                   </div>
                   <div className={`text-3xl font-bold mb-1 ${
                     isToday(date) ? 'text-emerald-600' : 'text-gray-800 dark:text-gray-100'
@@ -203,7 +204,7 @@ const CalendarPage = () => {
                     {date.getDate()}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                    {date.toLocaleDateString('en-US', { month: 'short' })}
+                    {date.toLocaleDateString('en-IN', { month: 'short' })}
                   </div>
                 </div>
               </motion.button>

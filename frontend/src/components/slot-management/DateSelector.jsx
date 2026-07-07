@@ -4,7 +4,8 @@ import { Calendar } from 'lucide-react';
 
 const DateSelector = ({ selectedDate, onDateChange }) => {
   const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('en-IN', {
+      timeZone: 'Asia/Kolkata',
       weekday: 'long',
       year: 'numeric',
       month: 'long',

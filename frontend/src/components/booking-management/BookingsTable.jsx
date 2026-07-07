@@ -57,7 +57,8 @@ const BookingsTable = ({ bookings, loading, onCancelBooking }) => {
                   </div>
                   <div className="text-sm text-gray-500">
                     {booking.slot?.startTime
-                      ? new Date(booking.slot.startTime).toLocaleTimeString('en-US', {
+                      ? new Date(booking.slot.startTime).toLocaleTimeString('en-IN', {
+                          timeZone: 'Asia/Kolkata',
                           hour: '2-digit',
                           minute: '2-digit',
                           hour12: true
@@ -65,7 +66,8 @@ const BookingsTable = ({ bookings, loading, onCancelBooking }) => {
                       : "—"}{' '}
                     -{' '}
                     {booking.slot?.endTime
-                      ? new Date(booking.slot.endTime).toLocaleTimeString('en-US', {
+                      ? new Date(booking.slot.endTime).toLocaleTimeString('en-IN', {
+                          timeZone: 'Asia/Kolkata',
                           hour: '2-digit',
                           minute: '2-digit',
                           hour12: true

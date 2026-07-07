@@ -170,7 +170,8 @@ const SlotManagement = ({ sportKey }) => {
                   <div className="flex-1">
                     <div className="font-medium">
                       {slot.startTime && !isNaN(new Date(slot.startTime))
-                        ? new Date(slot.startTime).toLocaleTimeString("en-US", {
+                        ? new Date(slot.startTime).toLocaleTimeString("en-IN", {
+                            timeZone: 'Asia/Kolkata',
                             hour: "2-digit",
                             minute: "2-digit",
                             hour12: true,
@@ -178,7 +179,8 @@ const SlotManagement = ({ sportKey }) => {
                         : "—"}{" "}
                       -{" "}
                       {slot.endTime && !isNaN(new Date(slot.endTime))
-                        ? new Date(slot.endTime).toLocaleTimeString("en-US", {
+                        ? new Date(slot.endTime).toLocaleTimeString("en-IN", {
+                            timeZone: 'Asia/Kolkata',
                             hour: "2-digit",
                             minute: "2-digit",
                             hour12: true,

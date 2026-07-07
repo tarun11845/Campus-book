@@ -48,7 +48,8 @@ const MyBookingsPage = () => {
   const formatDate = (date) =>
     !date || isNaN(new Date(date))
       ? "—"
-      : new Date(date).toLocaleDateString('en-US', {
+      : new Date(date).toLocaleDateString('en-IN', {
+          timeZone: 'Asia/Kolkata',
           weekday: 'long',
           month: 'long',
           day: 'numeric',
@@ -58,7 +59,8 @@ const MyBookingsPage = () => {
   const formatTime = (date) =>
     !date || isNaN(new Date(date))
       ? "—"
-      : new Date(date).toLocaleTimeString('en-US', {
+      : new Date(date).toLocaleTimeString('en-IN', {
+          timeZone: 'Asia/Kolkata',
           hour: '2-digit',
           minute: '2-digit',
           hour12: true,
