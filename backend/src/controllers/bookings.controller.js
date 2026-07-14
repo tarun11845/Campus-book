@@ -1,13 +1,9 @@
-import express from "express";
 import mongoose from "mongoose";
 import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
 import Sport from "../models/Sport.js";
-import User from "../models/User.js";
-import { auth } from "../middleware/auth.js";
 
-const router = express.Router();
-
+// Helper function
 const mapUserGenderToSlotGender = (gender) => {
   if (gender === "male") return "boys";
   if (gender === "female") return "girls";
@@ -17,7 +13,7 @@ const mapUserGenderToSlotGender = (gender) => {
 /* =========================
    CREATE BOOKING
 ========================= */
-router.post("/", auth(), async (req, res) => {
+export const createBooking = async (req, res) => {
   const { slotId } = req.body;
   const userId = req.user.id;
 
@@ -31,12 +27,11 @@ router.post("/", auth(), async (req, res) => {
 
     if (!slot) throw new Error("Slot not found");
     if (slot.isCancelled) throw new Error("Slot cancelled by admin");
-    if (slot.endTime <= new Date())
-      throw new Error("Cannot book past slot");
+    if (slot.endTime <= new Date()) throw new Error("Cannot book past slot");
 
     const user = await User.findById(userId).session(session);
 
-    // Gender check only applies to swimming and facilities with gender restrictions
+    // Facility level gender check
     if (
       slot.facility.allowedGender !== "both" &&
       slot.facility.allowedGender !== user.gender
@@ -44,6 +39,7 @@ router.post("/", auth(), async (req, res) => {
       throw new Error("Not allowed for your gender");
     }
 
+    // Slot level gender check
     if (slot.gender && slot.gender !== "both") {
       const requiredSlotGender = mapUserGenderToSlotGender(user.gender);
       if (!requiredSlotGender || slot.gender !== requiredSlotGender) {
@@ -51,14 +47,15 @@ router.post("/", auth(), async (req, res) => {
       }
     }
 
+    // Capacity check
     const activeCount = await Booking.countDocuments({
       slot: slotId,
       bookingStatus: "active"
     }).session(session);
 
-    if (activeCount >= slot.capacity)
-      throw new Error("Slot is full");
+    if (activeCount >= slot.capacity) throw new Error("Slot is full");
 
+    // Overlap check
     const userBookings = await Booking.find({
       user: userId,
       bookingStatus: "active"
@@ -80,11 +77,7 @@ router.post("/", auth(), async (req, res) => {
       );
 
     await Booking.create(
-      [{
-        user: userId,
-        slot: slotId,
-        bookingStatus: "active"
-      }],
+      [{ user: userId, slot: slotId, bookingStatus: "active" }],
       { session }
     );
 
@@ -97,13 +90,12 @@ router.post("/", auth(), async (req, res) => {
   } finally {
     session.endSession();
   }
-});
-
+};
 
 /* =========================
    GET MY BOOKINGS
 ========================= */
-router.get("/my-bookings", auth(), async (req, res) => {
+export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({
       user: req.user.id,
@@ -126,12 +118,12 @@ router.get("/my-bookings", auth(), async (req, res) => {
     console.error("Error fetching bookings:", err);
     res.status(500).json({ error: "Failed to fetch bookings" });
   }
-});
+};
 
 /* =========================
    ADMIN GET ALL BOOKINGS
 ========================= */
-router.get("/all", auth("admin"), async (req, res) => {
+export const getAllBookings = async (req, res) => {
   try {
     const { sport, date } = req.query;
     let sportRecord = null;
@@ -172,9 +164,7 @@ router.get("/all", auth("admin"), async (req, res) => {
         ? booking.slot?.facility?.sport?._id?.toString() === sportRecord._id.toString()
         : true;
       if (!sportMatch) return false;
-
       if (!targetDate) return true;
-
       const slotStart = booking.slot?.startTime;
       return slotStart >= targetDate && slotStart < nextDate;
     });
@@ -184,42 +174,46 @@ router.get("/all", auth("admin"), async (req, res) => {
     console.error("Error fetching admin bookings:", err);
     res.status(500).json({ error: "Failed to fetch admin bookings" });
   }
-});
-
+};
 
 /* =========================
    USER CANCEL BOOKING
 ========================= */
-router.post("/cancel", auth(), async (req, res) => {
+export const cancelBooking = async (req, res) => {
   const { bookingId } = req.body;
+  try {
+    const booking = await Booking.findById(bookingId);
+    if (!booking || booking.bookingStatus !== "active")
+      return res.status(404).json({ error: "Booking not found" });
 
-  const booking = await Booking.findById(bookingId);
-  if (!booking || booking.bookingStatus !== "active")
-    return res.status(404).json({ error: "Booking not found" });
+    booking.bookingStatus = "cancelled";
+    booking.cancelledAt = new Date();
+    await booking.save();
 
-  booking.bookingStatus = "cancelled";
-  booking.cancelledAt = new Date();
-  await booking.save();
-
-  res.json({ message: "Booking cancelled" });
-});
-
+    res.json({ message: "Booking cancelled" });
+  } catch (err) {
+    console.error("Error cancelling booking:", err);
+    res.status(500).json({ error: "Failed to cancel booking" });
+  }
+};
 
 /* =========================
    ADMIN CANCEL BOOKING
 ========================= */
-router.post("/admin-cancel", auth("admin"), async (req, res) => {
+export const adminCancelBooking = async (req, res) => {
   const { bookingId } = req.body;
+  try {
+    const booking = await Booking.findById(bookingId);
+    if (!booking)
+      return res.status(404).json({ error: "Not found" });
 
-  const booking = await Booking.findById(bookingId);
-  if (!booking)
-    return res.status(404).json({ error: "Not found" });
+    booking.bookingStatus = "admin_cancelled";
+    booking.cancelledAt = new Date();
+    await booking.save();
 
-  booking.bookingStatus = "admin_cancelled";
-  booking.cancelledAt = new Date();
-  await booking.save();
-
-  res.json({ message: "Booking cancelled by admin" });
-});
-
-export default router;
+    res.json({ message: "Booking cancelled by admin" });
+  } catch (err) {
+    console.error("Error cancelling booking:", err);
+    res.status(500).json({ error: "Failed to cancel booking" });
+  }
+};

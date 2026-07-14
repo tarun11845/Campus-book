@@ -5,11 +5,11 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { connectToDatabase } from './lib/db.js';
 
-import authRoutes from './routes/auth.js';
-import slotRoutes from './routes/slots.js';
-import bookingRoutes from './routes/bookings.js';
-import sportRoutes from './routes/sport.js';
-import facilityRoutes from './routes/facility.js';
+import authRoutes from './routes/auth.routes.js';
+import slotRoutes from './routes/slots.routes.js';
+import bookingRoutes from './routes/bookings.routes.js';
+import sportRoutes from './routes/sport.routes.js';
+import facilityRoutes from './routes/facility.routes.js';
 
 import './services/slotCleanupService.js';
 
@@ -27,7 +27,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-//app.options('/(.*)', cors());
+
 app.use(express.json());
 app.use(morgan('dev'));
 

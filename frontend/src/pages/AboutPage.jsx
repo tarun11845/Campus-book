@@ -160,7 +160,7 @@ const AboutPage = () => {
           <p className="text-lg text-white/80 mb-4">
             Contact us for assistance regarding bookings or technical issues.
           </p>
-          <p className="text-white/80"><b>Email:</b> tarundhote325@gmail.com</p>
+          <p className="text-white/80"><b>Email:</b> campusbooksupport@325gmail.com</p>
 
           <motion.button
             onClick={() => navigate('/')}
