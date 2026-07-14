@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
 import Sport from "../models/Sport.js";
-
+import User from "../models/User.js";
 // Helper function
 const mapUserGenderToSlotGender = (gender) => {
   if (gender === "male") return "boys";
