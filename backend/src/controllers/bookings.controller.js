@@ -65,6 +65,9 @@ export const createBooking = async (req, res) => {
 
     const isOverlapping = userBookings.some((booking) => {
       const bookedSlot = booking.slot;
+      // booking.slot can be null if the referenced Slot was auto-deleted
+      // (2-day TTL / cleanup job) while the booking itself is still active.
+      if (!bookedSlot) return false;
       return (
         bookedSlot.startTime < slot.endTime &&
         bookedSlot.endTime > slot.startTime

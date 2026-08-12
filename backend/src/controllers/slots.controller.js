@@ -20,6 +20,30 @@ const resolveUserGender = async (req) => {
   return user?.gender || null;
 };
 
+// Build a Date for a given calendar date + hour/minute *in IST (UTC+5:30)*,
+// regardless of what timezone the server process itself runs in (Render
+// defaults to UTC, which previously made "6:00" mean 6:00 UTC = 11:30 AM IST).
+// `dateInput` can be a Date or a "YYYY-MM-DD" string.
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+const buildISTDate = (dateInput, hours, minutes = 0) => {
+  const d = new Date(dateInput);
+  // Shift the instant by +5:30 first, then read the UTC calendar fields.
+  // This gives the correct IST calendar date whether dateInput is a plain
+  // "YYYY-MM-DD" string (parsed as UTC midnight) or a full ISO timestamp
+  // like selectedDate.toISOString() from the admin UI (which can land on
+  // the *previous* UTC day when it represents IST local midnight).
+  const istShifted = new Date(d.getTime() + IST_OFFSET_MS);
+  const y = istShifted.getUTCFullYear();
+  const m = istShifted.getUTCMonth();
+  const day = istShifted.getUTCDate();
+  const mm = String(m + 1).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+  const hh = String(hours).padStart(2, "0");
+  const min = String(minutes).padStart(2, "0");
+  // Explicit +05:30 offset makes this timezone-independent of the server.
+  return new Date(`${y}-${mm}-${dd}T${hh}:${min}:00.000+05:30`);
+};
+
 // ========================
 // CREATE SLOTS (ADMIN)
 // ========================
@@ -27,7 +51,7 @@ export const createSlots = async (req, res) => {
   console.log("CREATE SLOT BODY:", req.body);
 
   try {
-    const { date, sportKey, morningCount = 4, eveningCount = 4, courtNames = [] } = req.body;
+    const { date, sportKey, morningCount = 8, eveningCount = 8, courtNames = [] } = req.body;
 
     if (!date || !sportKey) {
       return res.status(400).json({ error: "Date and sportKey required" });
@@ -46,9 +70,6 @@ export const createSlots = async (req, res) => {
       });
     }
 
-    const selectedDate = new Date(date);
-    selectedDate.setHours(0, 0, 0, 0);
-
     // Find facilities for this sport
     const facilities = await Facility.find({ sport: sport._id });
     if (!facilities.length) {
@@ -59,12 +80,10 @@ export const createSlots = async (req, res) => {
 
     if (sportKey.toLowerCase() === "swimming") {
       for (const facility of facilities) {
-        // MORNING — GIRLS (6:00 AM - 8:00 AM)
+        // MORNING — GIRLS (6:00 AM - 8:00 AM IST)
         for (let i = 0; i < morningCount; i++) {
-          const start = new Date(selectedDate);
-          start.setHours(6, i * 30, 0, 0);
-          const end = new Date(start);
-          end.setMinutes(start.getMinutes() + 30);
+          const start = buildISTDate(date, 6, i * 30);
+          const end = new Date(start.getTime() + 30 * 60 * 1000);
 
           slotsToCreate.push({
             sport: sport._id,
@@ -76,12 +95,10 @@ export const createSlots = async (req, res) => {
           });
         }
 
-        // EVENING — BOYS (6:00 PM - 8:00 PM)
+        // EVENING — BOYS (6:00 PM - 8:00 PM IST)
         for (let i = 0; i < eveningCount; i++) {
-          const start = new Date(selectedDate);
-          start.setHours(18, i * 30, 0, 0);
-          const end = new Date(start);
-          end.setMinutes(start.getMinutes() + 30);
+          const start = buildISTDate(date, 18, i * 30);
+          const end = new Date(start.getTime() + 30 * 60 * 1000);
 
           slotsToCreate.push({
             sport: sport._id,
@@ -98,12 +115,10 @@ export const createSlots = async (req, res) => {
       const courtsToUse = courtNames.length > 0 ? courtNames : ["Court A"];
 
       for (const courtName of courtsToUse) {
-        // MORNING (6:00 AM - 10:00 AM)
+        // MORNING (6:00 AM - 10:00 AM IST)
         for (let i = 0; i < morningCount; i++) {
-          const start = new Date(selectedDate);
-          start.setHours(6, i * 30, 0, 0);
-          const end = new Date(start);
-          end.setMinutes(start.getMinutes() + 30);
+          const start = buildISTDate(date, 6, i * 30);
+          const end = new Date(start.getTime() + 30 * 60 * 1000);
 
           slotsToCreate.push({
             sport: sport._id,
@@ -116,12 +131,10 @@ export const createSlots = async (req, res) => {
           });
         }
 
-        // EVENING (4:00 PM - 8:00 PM)
+        // EVENING (4:00 PM - 8:00 PM IST)
         for (let i = 0; i < eveningCount; i++) {
-          const start = new Date(selectedDate);
-          start.setHours(16, i * 30, 0, 0);
-          const end = new Date(start);
-          end.setMinutes(start.getMinutes() + 30);
+          const start = buildISTDate(date, 16, i * 30);
+          const end = new Date(start.getTime() + 30 * 60 * 1000);
 
           slotsToCreate.push({
             sport: sport._id,

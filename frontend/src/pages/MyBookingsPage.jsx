@@ -89,7 +89,7 @@ const MyBookingsPage = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {bookings.map((booking) => {
+            {bookings.filter((booking) => booking.slot).map((booking) => {
               const slot = booking.slot;
               const facility = slot?.facility;
               const sport = facility?.sport;
