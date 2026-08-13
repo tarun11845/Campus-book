@@ -8,7 +8,7 @@ const TimeSlotSelector = ({ selectedTimes, onTimeToggle, onClearAll, existingSlo
   // Evening slots (from 4:15 PM, 45-minute intervals)
   const eveningSlots = ['16:15', '17:00', '17:45', '18:30', '19:15'];
 
-  // ✅ Convert 24-hour "HH:mm" → 12-hour "hh:mm AM/PM"
+  //  Convert 24-hour "HH:mm" → 12-hour "hh:mm AM/PM"
   const formatTo12Hour = (time) => {
     const [hourStr, minute] = time.split(':');
     let hour = parseInt(hourStr, 10);
@@ -45,7 +45,7 @@ const TimeSlotSelector = ({ selectedTimes, onTimeToggle, onClearAll, existingSlo
               disabled={alreadyExists}
               title={alreadyExists ? 'Slot already exists' : ''}
             >
-              {/* ✅ Show converted 12-hour format */}
+              {/*  Show converted 12-hour format */}
               {formatTo12Hour(time)}
               <span className="block text-xs text-gray-500">
                 {section}
