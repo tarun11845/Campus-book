@@ -179,10 +179,45 @@ export const createSlots = async (req, res) => {
       });
     }
 
-    await Slot.insertMany(slotsToCreate);
+    // Skip any slot that already exists (same facility/court, start time and
+    // gender) so re-clicking "Create Slots" for a date that already has
+    // slots doesn't pile up duplicates.
+    const dayStart = slotsToCreate.reduce(
+      (min, s) => (s.startTime < min ? s.startTime : min),
+      slotsToCreate[0]?.startTime
+    );
+    const dayEnd = slotsToCreate.reduce(
+      (max, s) => (s.startTime > max ? s.startTime : max),
+      slotsToCreate[0]?.startTime
+    );
+    const existing = await Slot.find({
+      sport: sport._id,
+      startTime: { $gte: dayStart, $lte: dayEnd },
+    }).select("facility courtName startTime gender");
+
+    const existingKeys = new Set(
+      existing.map(
+        (s) => `${s.facility}_${s.courtName || ""}_${s.startTime.getTime()}_${s.gender}`
+      )
+    );
+
+    const newSlots = slotsToCreate.filter(
+      (s) =>
+        !existingKeys.has(
+          `${s.facility}_${s.courtName || ""}_${s.startTime.getTime()}_${s.gender}`
+        )
+    );
+    const skippedCount = slotsToCreate.length - newSlots.length;
+
+    if (newSlots.length > 0) {
+      await Slot.insertMany(newSlots);
+    }
 
     res.status(201).json({
-      message: `${slotsToCreate.length} slots created successfully`,
+      message:
+        skippedCount > 0
+          ? `${newSlots.length} slots created, ${skippedCount} already existed and were skipped`
+          : `${newSlots.length} slots created successfully`,
     });
 
   } catch (err) {
@@ -223,7 +258,10 @@ export const getSlots = async (req, res) => {
       },
     };
 
-    if (sportKey.toLowerCase() === "swimming") {
+    if (sportKey.toLowerCase() === "swimming" && req.user?.role !== "admin") {
+      // Admins managing slots need to see both genders' slots (morning
+      // girls' + evening boys'); only students get filtered to their own
+      // gender when browsing what they can book.
       const userGender = await resolveUserGender(req);
       const desiredSlotGender = mapUserGenderToSlotGender(userGender);
       if (!desiredSlotGender) {

@@ -20,7 +20,7 @@ const PoolGrid = ({ slot, onSlotClick }) => {
     return { hours, minutes };
   };
 
-  // Format time with AM/PM for morning, 24-hour + PM for evening
+  // Format time as a proper 12-hour clock with AM/PM
   const formatTime = (dateString) => {
     if (!dateString) return "—";
     const parts = getISTParts(dateString);
@@ -29,7 +29,7 @@ const PoolGrid = ({ slot, onSlotClick }) => {
     if (hours < 12) {
       return `${hours === 0 ? 12 : hours}:${minutes} AM`; // Morning
     } else {
-      return `${hours}:${minutes} PM`; // Evening (24-hour + PM)
+      return `${hours === 12 ? 12 : hours - 12}:${minutes} PM`; // Evening (12-hour)
     }
   };
 
