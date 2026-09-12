@@ -34,7 +34,12 @@ const DateSelector = ({ selectedDate, onDateChange }) => {
         <input
           type="date"
           value={selectedDate.toISOString().split('T')[0]}
-          onChange={(e) => onDateChange(new Date(e.target.value))}
+          onChange={(e) => {
+            if (!e.target.value) return; // ignore a cleared/incomplete date input
+            const picked = new Date(e.target.value);
+            if (isNaN(picked.getTime())) return;
+            onDateChange(picked);
+          }}
           min={new Date().toISOString().split('T')[0]}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />

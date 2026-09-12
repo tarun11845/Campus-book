@@ -52,7 +52,8 @@ const CourtSlotCreator = ({
               Selected Date:
             </h4>
             <div className="text-xl font-bold text-emerald-700">
-              {new Date(selectedDate).toLocaleDateString("en-US", {
+              {new Date(selectedDate).toLocaleDateString("en-IN", {
+                timeZone: "Asia/Kolkata",
                 weekday: "long",
                 year: "numeric",
                 month: "long",

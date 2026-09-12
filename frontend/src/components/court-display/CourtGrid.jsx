@@ -2,13 +2,30 @@ import { motion } from "framer-motion";
 import { Users, Droplets } from "lucide-react";
 
 const CourtGrid = ({ slot, onSlotClick }) => {
+  // Read the hour/minute in IST regardless of the viewer's own browser/
+  // system timezone (previously used date.getHours()/getMinutes(), which
+  // read the *local machine's* timezone and showed wrong times for anyone
+  // not set to IST).
+  const getISTParts = (dateString) => {
+    const date = new Date(dateString);
+    if (isNaN(date)) return null;
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(date);
+    const hours = parseInt(parts.find((p) => p.type === "hour").value, 10);
+    const minutes = parts.find((p) => p.type === "minute").value;
+    return { hours, minutes };
+  };
+
   // Format time with AM/PM for morning, 24-hour + PM for evening
   const formatTime = (dateString) => {
     if (!dateString) return "—";
-    const date = new Date(dateString);
-    if (isNaN(date)) return "—";
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const parts = getISTParts(dateString);
+    if (!parts) return "—";
+    const { hours, minutes } = parts;
     if (hours < 12) {
       return `${hours === 0 ? 12 : hours}:${minutes} AM`; // Morning
     } else {
@@ -19,10 +36,9 @@ const CourtGrid = ({ slot, onSlotClick }) => {
   // Morning / Evening helper, subtle styling
   const getPeriod = (dateString) => {
     if (!dateString) return "";
-    const d = new Date(dateString);
-    if (isNaN(d)) return "";
-    const hours = d.getHours();
-    return hours < 12 ? "Morning" : "Evening";
+    const parts = getISTParts(dateString);
+    if (!parts) return "";
+    return parts.hours < 12 ? "Morning" : "Evening";
   };
 
   // Get gender-specific styling

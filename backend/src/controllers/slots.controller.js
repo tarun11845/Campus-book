@@ -57,6 +57,13 @@ export const createSlots = async (req, res) => {
       return res.status(400).json({ error: "Date and sportKey required" });
     }
 
+    // Guard against a bad/unparseable date reaching buildISTDate (and from
+    // there, a raw Mongoose "Cast to date failed for value 'Invalid Date'"
+    // error). Fail fast here with a clear message instead.
+    if (isNaN(new Date(date).getTime())) {
+      return res.status(400).json({ error: `Invalid date received: "${date}"` });
+    }
+
     // Find sport by key — case insensitive
     const sport = await Sport.findOne({
       name: { $regex: `^${sportKey}$`, $options: "i" }
@@ -147,6 +154,15 @@ export const createSlots = async (req, res) => {
           });
         }
       }
+    }
+
+    const invalidSlot = slotsToCreate.find(
+      (s) => isNaN(s.startTime?.getTime()) || isNaN(s.endTime?.getTime())
+    );
+    if (invalidSlot) {
+      return res.status(400).json({
+        error: "Could not build valid slot times from the given date. Please re-select the date and try again.",
+      });
     }
 
     await Slot.insertMany(slotsToCreate);

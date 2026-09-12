@@ -90,7 +90,9 @@ const BookingsTable = ({ bookings, loading, onCancelBooking }) => {
                 </div>
               </td>
               <td className="py-3 px-4 text-sm text-gray-500">
-                {new Date(booking.createdAt).toLocaleString()}
+                {new Date(booking.createdAt).toLocaleString("en-IN", {
+                  timeZone: "Asia/Kolkata",
+                })}
               </td>
               <td className="py-3 px-4">
                 <button

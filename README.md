@@ -24,7 +24,7 @@ A modern web application for booking swimming pool slots at NITK with gender sep
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/tarun11845/Campus-book.git
   cd Campus-book
    ```
 
@@ -112,25 +112,27 @@ If the setup script doesn't work, follow these steps:
 
 ## 🏗️ Project Structure
 
-```
+```text
 B-D-App/
 ├── backend/                 # Node.js/Express backend
 │   ├── src/
-│   │   ├── models/         # Database models
-│   │   ├── routes/         # API routes
-│   │   ├── middleware/     # Authentication middleware
-│   │   └── services/       # Business logic
+│   │   ├── models/          # Database models
+│   │   ├── routes/          # API routes
+│   │   ├── controllers/     # Request handling and controller logic
+│   │   ├── middleware/      # Authentication and request middleware
+│   │   └── services/        # Business logic
 │   └── package.json
-├── frontend/               # React frontend
+│
+├── frontend/                # React frontend
 │   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/          # Page components
-│   │   ├── contexts/       # React contexts
-│   │   └── assets/         # Static assets
+│   │   ├── components/      # Reusable React components
+│   │   ├── pages/           # Page components
+│   │   ├── contexts/        # React contexts and state management
+│   │   └── assets/          # Static assets
 │   └── package.json
-├── setup.js               # Setup script
+│
+├── setup.js                 # Setup script
 └── README.md
-```
 
 ## 🔧 Configuration
 

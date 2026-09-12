@@ -60,8 +60,8 @@ const SlotManagement = ({ sportKey }) => {
   };
 
   const createSlots = async (courtNames = []) => {
-    if (!selectedDate) {
-      showMessage("error", "Please select a date");
+    if (!selectedDate || isNaN(new Date(selectedDate).getTime())) {
+      showMessage("error", "Please select a valid date");
       return;
     }
 
