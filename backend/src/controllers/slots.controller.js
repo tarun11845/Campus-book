@@ -44,6 +44,16 @@ const buildISTDate = (dateInput, hours, minutes = 0) => {
   return new Date(`${y}-${mm}-${dd}T${hh}:${min}:00.000+05:30`);
 };
 
+// Slots are spaced 30 minutes apart starting at `baseHour`. Index i's raw
+// offset is i*30 minutes, which overflows 60 once i >= 2 (e.g. i=2 -> "60
+// minutes"), producing an invalid time string and an Invalid Date. This
+// rolls the overflow into the hour instead, e.g. baseHour=6, i=2 -> 7:00,
+// i=3 -> 7:30, and so on.
+const computeSlotHM = (baseHour, index) => {
+  const totalMinutes = baseHour * 60 + index * 30;
+  return { hours: Math.floor(totalMinutes / 60) % 24, minutes: totalMinutes % 60 };
+};
+
 // ========================
 // CREATE SLOTS (ADMIN)
 // ========================
@@ -89,7 +99,8 @@ export const createSlots = async (req, res) => {
       for (const facility of facilities) {
         // MORNING — GIRLS (6:00 AM - 8:00 AM IST)
         for (let i = 0; i < morningCount; i++) {
-          const start = buildISTDate(date, 6, i * 30);
+          const { hours, minutes } = computeSlotHM(6, i);
+          const start = buildISTDate(date, hours, minutes);
           const end = new Date(start.getTime() + 30 * 60 * 1000);
 
           slotsToCreate.push({
@@ -104,7 +115,8 @@ export const createSlots = async (req, res) => {
 
         // EVENING — BOYS (6:00 PM - 8:00 PM IST)
         for (let i = 0; i < eveningCount; i++) {
-          const start = buildISTDate(date, 18, i * 30);
+          const { hours, minutes } = computeSlotHM(18, i);
+          const start = buildISTDate(date, hours, minutes);
           const end = new Date(start.getTime() + 30 * 60 * 1000);
 
           slotsToCreate.push({
@@ -124,7 +136,8 @@ export const createSlots = async (req, res) => {
       for (const courtName of courtsToUse) {
         // MORNING (6:00 AM - 10:00 AM IST)
         for (let i = 0; i < morningCount; i++) {
-          const start = buildISTDate(date, 6, i * 30);
+          const { hours, minutes } = computeSlotHM(6, i);
+          const start = buildISTDate(date, hours, minutes);
           const end = new Date(start.getTime() + 30 * 60 * 1000);
 
           slotsToCreate.push({
@@ -140,7 +153,8 @@ export const createSlots = async (req, res) => {
 
         // EVENING (4:00 PM - 8:00 PM IST)
         for (let i = 0; i < eveningCount; i++) {
-          const start = buildISTDate(date, 16, i * 30);
+          const { hours, minutes } = computeSlotHM(16, i);
+          const start = buildISTDate(date, hours, minutes);
           const end = new Date(start.getTime() + 30 * 60 * 1000);
 
           slotsToCreate.push({
