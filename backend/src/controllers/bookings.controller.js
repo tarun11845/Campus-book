@@ -18,77 +18,89 @@ export const createBooking = async (req, res) => {
   const userId = req.user.id;
 
   const session = await mongoose.startSession();
-  session.startTransaction();
 
   try {
-    const slot = await Slot.findById(slotId)
-      .populate("facility")
-      .session(session);
+    // session.withTransaction() runs the callback inside a transaction and
+    // automatically retries it if MongoDB reports a TransientTransactionError
+    // — which is exactly what happens when two concurrent requests both try
+    // to update the same Slot document (e.g. two students booking the last
+    // seat at the same instant). The loser gets retried and, on retry, sees
+    // the other's already-committed change.
+    await session.withTransaction(async () => {
+      const slot = await Slot.findById(slotId)
+        .populate("facility")
+        .session(session);
 
-    if (!slot) throw new Error("Slot not found");
-    if (slot.isCancelled) throw new Error("Slot cancelled by admin");
-    if (slot.endTime <= new Date()) throw new Error("Cannot book past slot");
+      if (!slot) throw new Error("Slot not found");
+      if (slot.isCancelled) throw new Error("Slot cancelled by admin");
+      if (slot.endTime <= new Date()) throw new Error("Cannot book past slot");
 
-    const user = await User.findById(userId).session(session);
+      const user = await User.findById(userId).session(session);
 
-    // Facility level gender check
-    if (
-      slot.facility.allowedGender !== "both" &&
-      slot.facility.allowedGender !== user.gender
-    ) {
-      throw new Error("Not allowed for your gender");
-    }
-
-    // Slot level gender check
-    if (slot.gender && slot.gender !== "both") {
-      const requiredSlotGender = mapUserGenderToSlotGender(user.gender);
-      if (!requiredSlotGender || slot.gender !== requiredSlotGender) {
+      // Facility level gender check
+      if (
+        slot.facility.allowedGender !== "both" &&
+        slot.facility.allowedGender !== user.gender
+      ) {
         throw new Error("Not allowed for your gender");
       }
-    }
 
-    // Capacity check
-    const activeCount = await Booking.countDocuments({
-      slot: slotId,
-      bookingStatus: "active"
-    }).session(session);
+      // Slot level gender check
+      if (slot.gender && slot.gender !== "both") {
+        const requiredSlotGender = mapUserGenderToSlotGender(user.gender);
+        if (!requiredSlotGender || slot.gender !== requiredSlotGender) {
+          throw new Error("Not allowed for your gender");
+        }
+      }
 
-    if (activeCount >= slot.capacity) throw new Error("Slot is full");
+      // Overlap check
+      const userBookings = await Booking.find({
+        user: userId,
+        bookingStatus: "active"
+      })
+        .populate("slot")
+        .session(session);
 
-    // Overlap check
-    const userBookings = await Booking.find({
-      user: userId,
-      bookingStatus: "active"
-    })
-      .populate("slot")
-      .session(session);
+      const isOverlapping = userBookings.some((booking) => {
+        const bookedSlot = booking.slot;
+        // booking.slot can be null if the referenced Slot was auto-deleted
+        // (2-day TTL / cleanup job) while the booking itself is still active.
+        if (!bookedSlot) return false;
+        return (
+          bookedSlot.startTime < slot.endTime &&
+          bookedSlot.endTime > slot.startTime
+        );
+      });
 
-    const isOverlapping = userBookings.some((booking) => {
-      const bookedSlot = booking.slot;
-      // booking.slot can be null if the referenced Slot was auto-deleted
-      // (2-day TTL / cleanup job) while the booking itself is still active.
-      if (!bookedSlot) return false;
-      return (
-        bookedSlot.startTime < slot.endTime &&
-        bookedSlot.endTime > slot.startTime
+      if (isOverlapping)
+        throw new Error(
+          "You already have a booking during this time period. Please choose a different slot."
+        );
+
+      // Atomic capacity check-and-increment. This single findOneAndUpdate
+      // is the actual fix for the race condition described above: the
+      // condition (bookedCount < capacity) and the increment happen as
+      // one atomic operation on one document, so two concurrent requests
+      // can't both read "9 booked, capacity 10" and both proceed —
+      // MongoDB serializes writes to the same document, and the loser
+      // either sees the updated count on retry or gets a clean
+      // "Slot is full" instead of silently overbooking.
+      const reservedSlot = await Slot.findOneAndUpdate(
+        { _id: slotId, $expr: { $lt: ["$bookedCount", "$capacity"] } },
+        { $inc: { bookedCount: 1 } },
+        { new: true, session }
+      );
+
+      if (!reservedSlot) throw new Error("Slot is full");
+
+      await Booking.create(
+        [{ user: userId, slot: slotId, bookingStatus: "active" }],
+        { session }
       );
     });
 
-    if (isOverlapping)
-      throw new Error(
-        "You already have a booking during this time period. Please choose a different slot."
-      );
-
-    await Booking.create(
-      [{ user: userId, slot: slotId, bookingStatus: "active" }],
-      { session }
-    );
-
-    await session.commitTransaction();
     res.status(201).json({ message: "Booking successful" });
-
   } catch (err) {
-    await session.abortTransaction();
     res.status(400).json({ error: err.message });
   } finally {
     session.endSession();
@@ -184,19 +196,38 @@ export const getAllBookings = async (req, res) => {
 ========================= */
 export const cancelBooking = async (req, res) => {
   const { bookingId } = req.body;
-  try {
-    const booking = await Booking.findById(bookingId);
-    if (!booking || booking.bookingStatus !== "active")
-      return res.status(404).json({ error: "Booking not found" });
+  const session = await mongoose.startSession();
 
-    booking.bookingStatus = "cancelled";
-    booking.cancelledAt = new Date();
-    await booking.save();
+  try {
+    await session.withTransaction(async () => {
+      const booking = await Booking.findById(bookingId).session(session);
+      if (!booking || booking.bookingStatus !== "active") {
+        throw new Error("NOT_FOUND");
+      }
+
+      booking.bookingStatus = "cancelled";
+      booking.cancelledAt = new Date();
+      await booking.save({ session });
+
+      // Free up the seat. If the slot has since been auto-deleted (TTL
+      // cleanup), there's nothing to decrement — that's fine, the booking
+      // cancellation itself still goes through.
+      await Slot.findByIdAndUpdate(
+        booking.slot,
+        { $inc: { bookedCount: -1 } },
+        { session }
+      );
+    });
 
     res.json({ message: "Booking cancelled" });
   } catch (err) {
+    if (err.message === "NOT_FOUND") {
+      return res.status(404).json({ error: "Booking not found" });
+    }
     console.error("Error cancelling booking:", err);
     res.status(500).json({ error: "Failed to cancel booking" });
+  } finally {
+    session.endSession();
   }
 };
 
@@ -205,18 +236,38 @@ export const cancelBooking = async (req, res) => {
 ========================= */
 export const adminCancelBooking = async (req, res) => {
   const { bookingId } = req.body;
-  try {
-    const booking = await Booking.findById(bookingId);
-    if (!booking)
-      return res.status(404).json({ error: "Not found" });
+  const session = await mongoose.startSession();
 
-    booking.bookingStatus = "admin_cancelled";
-    booking.cancelledAt = new Date();
-    await booking.save();
+  try {
+    await session.withTransaction(async () => {
+      const booking = await Booking.findById(bookingId).session(session);
+      if (!booking) throw new Error("NOT_FOUND");
+
+      // Only free up the seat if it was actually still counted as active —
+      // an already-cancelled booking shouldn't decrement bookedCount again.
+      const wasActive = booking.bookingStatus === "active";
+
+      booking.bookingStatus = "admin_cancelled";
+      booking.cancelledAt = new Date();
+      await booking.save({ session });
+
+      if (wasActive) {
+        await Slot.findByIdAndUpdate(
+          booking.slot,
+          { $inc: { bookedCount: -1 } },
+          { session }
+        );
+      }
+    });
 
     res.json({ message: "Booking cancelled by admin" });
   } catch (err) {
+    if (err.message === "NOT_FOUND") {
+      return res.status(404).json({ error: "Not found" });
+    }
     console.error("Error cancelling booking:", err);
     res.status(500).json({ error: "Failed to cancel booking" });
+  } finally {
+    session.endSession();
   }
 };

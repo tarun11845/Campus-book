@@ -27,6 +27,20 @@ const SlotSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Atomic occupancy counter, incremented/decremented alongside each
+    // Booking create/cancel via a single conditional findOneAndUpdate.
+    // This is what actually prevents overbooking under concurrent
+    // requests — counting active Booking documents at read time (the old
+    // approach) has a race: two simultaneous requests can each read the
+    // same "9 booked" count before either has committed, and both pass
+    // the capacity check. bookedCount fixes this because MongoDB
+    // guarantees the read-check-and-write inside a single
+    // findOneAndUpdate happens atomically for that one document.
+    bookedCount: {
+      type: Number,
+      default: 0,
+    },
+
     gender: {
       type: String,
       enum: ["boys", "girls", "both"],
