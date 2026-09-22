@@ -1,288 +1,313 @@
-# 🏊‍♂️ NITK Swimming Pool Booking App
+# CampusBook
 
-A modern web application for booking swimming pool slots at NITK with gender separation and real-time capacity management.
+A full-stack web application for managing and booking sports facilities at a college campus. CampusBook allows students to view available facilities, book time slots, manage their bookings, and cancel bookings when required. Admins can create and manage slots and monitor bookings.
 
-## ✨ Features
-
-- **Gender Separation**: Morning slots for boys, evening slots for girls
-- **30-minute Slots**: Perfect duration for swimming sessions
-- **Real-time Booking**: Live availability and instant confirmations
-- **Capacity Management**: 20 swimmers per slot with visual indicators
-- **Admin Panel**: Easy slot creation and management
-- **Responsive Design**: Works on all devices
-- **Modern UI**: Beautiful, intuitive interface
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Node.js** (version 18 or higher)
-- **MongoDB** (running locally or cloud instance)
-- **npm** (comes with Node.js)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/tarun11845/Campus-book.git
-  cd Campus-book
-   ```
-
-2. **Run the setup script**
-   ```bash
-   node setup.js
-   ```
-
-   This will:
-   - Install all dependencies
-   - Create necessary configuration files
-   - Set up the development environment
-
-3. **Configure MongoDB**
-   - Make sure MongoDB is running on your system
-   - Update the `MONGODB_URI` in `backend/.env` if needed
-
-4. **Start the application**
-   ```bash
-   npm run dev
-   ```
-
-   This starts both frontend and backend servers simultaneously.
-
-### Alternative Manual Setup
-
-If the setup script doesn't work, follow these steps:
-
-1. **Install root dependencies**
-   ```bash
-   npm install
-   ```
-
-2. **Install backend dependencies**
-   ```bash
-   cd backend
-   npm install
-   cd ..
-   ```
-
-3. **Install frontend dependencies**
-   ```bash
-   cd frontend
-   npm install
-   cd ..
-   ```
-
-4. **Create environment file**
-   ```bash
-   cp backend/.env.example backend/.env
-   ```
-
-5. **Start the servers**
-   ```bash
-   # Terminal 1 - Backend
-   npm start
-
-   # Terminal 2 - Frontend
-   npm run dev --prefix frontend
-   ```
-
-## 🌐 Access Points
-
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:4000
-- **Admin Panel**: http://localhost:5173/admin (admin login required)
-
-## 📱 Usage
-
-### For Students
-1. Visit the application
-2. Login with your credentials
-3. Browse available swimming pool slots
-4. Book your preferred time slot
-5. View your bookings in "My Bookings"
-
-### For Admins
-1. Login with admin credentials
-2. Go to Admin panel
-3. Select a date to create swimming pool slots
-4. System automatically creates:
-   - 5 morning slots (6:00-8:00 AM) for boys
-   - 5 evening slots (6:00-8:00 PM) for girls
-5. Monitor bookings and manage slots
-
-## 🏗️ Project Structure
-
-```text
-B-D-App/
-├── backend/                 # Node.js/Express backend
-│   ├── src/
-│   │   ├── models/          # Database models
-│   │   ├── routes/          # API routes
-│   │   ├── controllers/     # Request handling and controller logic
-│   │   ├── middleware/      # Authentication and request middleware
-│   │   └── services/        # Business logic
-│   └── package.json
-│
-├── frontend/                # React frontend
-│   ├── src/
-│   │   ├── components/      # Reusable React components
-│   │   ├── pages/           # Page components
-│   │   ├── contexts/        # React contexts and state management
-│   │   └── assets/          # Static assets
-│   └── package.json
-│
-├── setup.js                 # Setup script
-└── README.md
-
-## 🔧 Configuration
-
-### Backend Configuration (`backend/.env`)
-
-```env
-# Database
-MONGODB_URI=mongodb://localhost:27017/nitk-pool-booking
-
-# JWT Secret
-JWT_SECRET=your-super-secret-jwt-key
-
-# Server
-PORT=4000
-NODE_ENV=development
-
-# Email (optional)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
-
-# Frontend URL
-FRONTEND_URL=http://localhost:5173
-```
-
-### Frontend Configuration
-
-The frontend automatically detects the environment and uses the appropriate API endpoints.
-
-## 📊 Database Schema
-
-### Users
-- `name`: User's full name
-- `email`: User's email address
-- `password`: Hashed password
-- `role`: 'student' or 'admin'
-
-### Slots
-- `startTime`: Slot start time
-- `endTime`: Slot end time
-- `gender`: 'boys' or 'girls'
-- `capacity`: Maximum swimmers (20)
-- `occupied`: Current bookings count
-
-### Bookings
-- `user`: Reference to User
-- `slot`: Reference to Slot
-- `cancelledAt`: Cancellation timestamp (null if active)
-
-## 🚀 Deployment
-
-### Backend Deployment
-1. Set up MongoDB Atlas or your preferred MongoDB hosting
-2. Update `MONGODB_URI` in production environment
-3. Set `NODE_ENV=production`
-4. Deploy to your preferred platform (Heroku, Railway, etc.)
-
-### Frontend Deployment
-1. Build the frontend: `npm run build --prefix frontend`
-2. Deploy the `dist` folder to your hosting service
-3. Update `FRONTEND_URL` in backend configuration
-
-## 🛠️ Development
-
-### Available Scripts
-
-```bash
-# Install all dependencies
-npm run install-all
-
-# Start both frontend and backend
-npm run dev
-
-# Start only backend
-npm start
-
-# Start only frontend
-npm run dev --prefix frontend
-
-# Build frontend for production
-npm run build
-
-# Build and start for production
-npm run build-all
-```
-
-### Tech Stack
-
-**Backend:**
-- Node.js
-- Express.js
-- MongoDB with Mongoose
-- JWT Authentication
-- bcrypt for password hashing
-
-**Frontend:**
-- React 19
-- Vite
-- Tailwind CSS
-- Framer Motion
-- React Router
-- Axios
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the ISC License.
-
-## 🆘 Support
-
-If you encounter any issues:
-
-1. Check the console for error messages
-2. Ensure MongoDB is running
-3. Verify all dependencies are installed
-4. Check the `.env` configuration
-5. Create an issue in the repository
-
-## 🎯 Features Overview
-
-### Swimming Pool Slots
-- **Duration**: 30 minutes per slot
-- **Capacity**: 20 swimmers per slot
-- **Gender Separation**: 
-  - Morning slots (6:00-8:00 AM) for boys
-  - Evening slots (6:00-8:00 PM) for girls
-- **Time Slots**: 6:00, 6:30, 7:00, 7:30, 8:00
-
-### Booking System
-- Real-time availability checking
-- Individual swimmer bookings
-- Capacity visualization
-- Booking cancellation
-- Admin management
-
-### User Interface
-- Modern, responsive design
-- Gender-specific color coding
-- Real-time updates
-- Intuitive navigation
-- Mobile-friendly
+The system is designed to provide **secure authentication, role-based access, real-time slot availability, capacity management, and safe concurrent booking**.
 
 ---
 
-**Happy Swimming! 🏊‍♂️🏊‍♀️**
+##  Features
+
+###  Student Features
+
+* **User Authentication** – Secure student registration and login
+* **Browse Facilities** – View available sports facilities and their slots
+* **Slot Booking** – Book an available slot for a selected facility
+* **Real-time Availability** – View current slot occupancy before booking
+* **Booking Management** – View all active and previous bookings
+* **Booking Cancellation** – Cancel eligible bookings
+* **Gender-based Access** – Access slots according to facility/slot gender restrictions
+* **Responsive UI** – Works across desktop, tablet, and mobile devices
+
+### Admin Features
+
+* **Admin Authentication** – Separate admin access
+* **Slot Management** – Create and manage facility slots
+* **Booking Monitoring** – Monitor bookings and slot occupancy
+* **Facility Management** – Manage sports facilities and their availability
+* **Capacity Management** – Set and monitor the maximum capacity of slots
+
+### Security & Reliability
+
+* JWT-based authentication
+* Password hashing using bcrypt
+* Role-based authorization
+* Protected API routes
+* Input validation
+* MongoDB transactions for concurrent bookings
+* Prevention of overbooking when multiple users try to book the last available slot
+
+---
+
+##  Quick Start
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+* **Node.js** 18 or higher
+* **MongoDB**
+* **npm**
+
+---
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/tarun11845/Campus-book.git
+cd Campus-book
+```
+
+### 2. Install Dependencies
+
+Install the root, backend, and frontend dependencies:
+
+```bash
+npm install
+```
+
+```bash
+cd backend
+npm install
+cd ..
+```
+
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env` file inside the `backend` folder.
+
+```env
+MONGODB_URI=mongodb://localhost:27017/campusbook
+
+JWT_SECRET=your-super-secret-jwt-key
+
+PORT=4000
+NODE_ENV=development
+
+FRONTEND_URL=http://localhost:5173
+```
+
+If you are using a MongoDB Atlas database, replace the `MONGODB_URI` with your Atlas connection string.
+
+---
+
+## Running the Application
+
+### Start Backend
+
+```bash
+npm start
+```
+
+The backend will run on:
+
+```text
+http://localhost:4000
+```
+
+### Start Frontend
+
+Open another terminal:
+
+```bash
+npm run dev --prefix frontend
+```
+
+The frontend will run on:
+
+```text
+http://localhost:5173
+```
+
+### Run Both Together
+
+If the root project is configured with the required scripts:
+
+```bash
+npm run dev
+```
+
+---
+
+## Access Points
+
+| Service     | URL                           |
+| ----------- | ----------------------------- |
+| Frontend    | `http://localhost:5173`       |
+| Backend API | `http://localhost:4000`       |
+| Admin Panel | `http://localhost:5173/admin` |
+
+---
+
+#  How CampusBook Works
+
+##  For Students
+
+1. Create an account or log in.
+2. Browse available sports facilities.
+3. Select a facility.
+4. View available time slots.
+5. Check the current slot capacity.
+6. Select an available slot.
+7. Confirm the booking.
+8. View the booking under **My Bookings**.
+9. Cancel the booking when permitted.
+
+---
+
+## For Admins
+
+1. Log in using an admin account.
+2. Open the Admin Panel.
+3. Select the required sports facility.
+4. Create or manage available time slots.
+5. Set slot capacity and other restrictions.
+6. Monitor bookings and occupancy.
+7. Manage existing slots when required.
+
+---
+
+#  System Architecture
+
+CampusBook follows a **three-tier architecture**:
+
+```text
+┌─────────────────────────────┐
+│        React Frontend       │
+│                             │
+│  Components / Pages /       │
+│  Contexts / UI              │
+└──────────────┬──────────────┘
+               │
+               │ HTTP / REST API
+               ▼
+┌─────────────────────────────┐
+│      Node.js + Express      │
+│                             │
+│ Routes → Controllers →      │
+│ Services → Models           │
+└──────────────┬──────────────┘
+               │
+               │ Mongoose
+               ▼
+┌─────────────────────────────┐
+│          MongoDB            │
+│                             │
+│ Users / Facilities / Slots  │
+│ Bookings                    │
+└─────────────────────────────┘
+```
+
+### Request Flow
+
+```text
+User
+ ↓
+React Frontend
+ ↓
+Express API
+ ↓
+Authentication / Authorization
+ ↓
+Controller
+ ↓
+Service / Business Logic
+ ↓
+Mongoose Models
+ ↓
+MongoDB
+```
+
+---
+
+#  Project Structure
+
+```text
+Campus-book/
+│
+├── backend/
+│   ├── src/
+│   │   ├── models/
+│   │   │   ├── User.js
+│   │   │   ├── Slot.js
+│   │   │   ├── Booking.js
+│   │   │   └── Sport.js
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── bookingRoutes.js
+│   │   │   ├── slotRoutes.js
+│   │   │   └── sportRoutes.js
+│   │   │
+│   │   ├── controllers/
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── authentication
+│   │   │   └── authorization
+│   │   │
+│   │   └── services/
+│   │
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── contexts/
+│   │   └── assets/
+│   │
+│   └── package.json
+│
+├── setup.js
+├── package.json
+└── README.md
+```
+
+---
+
+#  Database Design
+
+CampusBook uses **MongoDB with Mongoose**.
+
+## Users
+
+Stores student and administrator information.
+
+```text
+User
+├── name
+├── email
+├── password
+└── role
+```
+
+Possible roles:
+
+```text
+student
+admin
+```
+
+Passwords are securely hashed before being stored.
+
+---
+
+## Sports / Facilities
+
+Stores information about the sports facilities available in the campus.
+
+```text
+Sport
+├── name
+├── description
+├── capacity
+└── other fac
+```
